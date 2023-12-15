@@ -1,78 +1,70 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <Wire.h>
+#include <Ticker.h> //software timer
 
 #include "PWM.h"
 #include "SHT40.h"
 #include "MAX6675_my.h"
+#include "OLED.h"
 // put function declarations here:
-void display_menu();
+void set_flag(int *flag);
+int detFlag(int *flag);
+// software timer
+Ticker oledTimer, sht40Timer, max6675Timer;
 
-#define SCL 0
-#define SDA 1
-
-// use hardware I2C
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /*reset=*/U8X8_PIN_NONE, /*clock=*/SCL, /*data=*/SDA);
-
-int progess = 0;
+int flagOLED = 0, flagSHT40 = 0, flagMAX6675 = 0;
 
 void setup()
 {
-  // put your setup code here, to run once:
+
   Serial.begin(115200);
-
-  // u8g2 initialization
-  u8g2.begin();
-  u8g2.enableUTF8Print();
-
+  OLED096_setup();
   PWM_setup();
   SHT40_setup();
   MAX6675_setup();
+
+  // software timer
+  oledTimer.attach_ms(100, set_flag, &flagOLED);
+  sht40Timer.attach_ms(50, set_flag, &flagSHT40);
+  max6675Timer.attach_ms(200, set_flag, &flagMAX6675);
 }
 
 void loop()
 {
-
-  // delay(300);
-
   // put your main code here, to run repeatedly:
-  Serial.println("running");
+  if (detFlag(&flagOLED))
+  {
+    OLED096_loop();
+  }
+  if (detFlag(&flagSHT40))
+  {
+    SHT40_loop();
+  }
+  if (detFlag(&flagMAX6675))
+  {
+    MAX6675_loop();
+    Serial.println("running");
+  }
 
-  display_menu();
-
-  PWM_loop();
-  ledcWrite(4, 300); // 输出PWM
-  delay(5);
-
-  SHT40_loop();
-  MAX6675_loop();
-  delay(1000);
+  // PWM_loop();
 }
 
 // put function definitions here:
-
-void display_menu()
+void set_flag(int *flag)
 {
-  u8g2.setFont(u8g2_font_unifont_t_chinese2);
-  u8g2.setFontDirection(0);
-
-  u8g2.clearBuffer();
-
-  u8g2.firstPage();
-  do
+  *flag = 1;
+}
+// detect flag
+int detFlag(int *flag)
+{
+  if (*flag == 1)
   {
-    u8g2.drawFrame(0, 10, 128, 20);
-    u8g2.drawUTF8(2, 60, "Heating up");
-    u8g2.drawBox(0, 10, progess, 20);
-
-  } while (u8g2.nextPage());
-
-  if (progess < 128)
-  {
-    progess += 10;
+    *flag = 0;
+    return 1;
   }
   else
   {
-    progess = 0;
+    return 0;
   }
 }
