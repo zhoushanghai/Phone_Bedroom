@@ -1,6 +1,10 @@
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <Wire.h>
+
+#include "PWM.h"
+#include "SHT40.h"
+#include "MAX6675_my.h"
 // put function declarations here:
 void display_menu();
 
@@ -15,10 +19,15 @@ int progess = 0;
 void setup()
 {
   // put your setup code here, to run once:
+  Serial.begin(115200);
+
+  // u8g2 initialization
   u8g2.begin();
   u8g2.enableUTF8Print();
 
-  Serial.begin(115200);
+  PWM_setup();
+  SHT40_setup();
+  MAX6675_setup();
 }
 
 void loop()
@@ -30,6 +39,14 @@ void loop()
   Serial.println("running");
 
   display_menu();
+
+  PWM_loop();
+  ledcWrite(4, 300); // 输出PWM
+  delay(5);
+
+  SHT40_loop();
+  MAX6675_loop();
+  delay(1000);
 }
 
 // put function definitions here:
