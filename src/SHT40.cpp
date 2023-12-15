@@ -12,6 +12,8 @@
 #include <Wire.h>
 #include "SHT40.h"
 
+// extern THDate pfData;
+
 Adafruit_SHT4x sht4 = Adafruit_SHT4x();
 
 void SHT40_setup()
@@ -78,17 +80,9 @@ void SHT40_loop()
     sensors_event_t humidity, temp;
 
     uint32_t timestamp = millis();
-    sht4.getEvent(&humidity, &temp); // populate temp and humidity objects with fresh data
-    timestamp = millis() - timestamp;
+    sht4.getEvent(&humidity, &temp);  // populate temp and humidity objects with fresh data
+    timestamp = millis() - timestamp; // how long to determine temp and humidity
 
-    Serial.print("Temperature: ");
-    Serial.print(temp.temperature);
-    Serial.println(" degrees C");
-    Serial.print("Humidity: ");
-    Serial.print(humidity.relative_humidity);
-    Serial.println("% rH");
-
-    Serial.print("Read duration (ms): ");
-    Serial.println(timestamp);
-    
+    pfData.SHT40Temp = temp.temperature; // get temperature
+    pfData.SHT40Humi = humidity.relative_humidity;
 }

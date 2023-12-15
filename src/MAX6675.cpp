@@ -6,6 +6,9 @@
 #include <LiquidCrystal.h>
 #include <Wire.h>
 
+extern THDate pfData;
+/////////////////////////////////////////
+
 int thermoDO = 4;
 int thermoCS = 5;
 int thermoCLK = 6;
@@ -35,9 +38,8 @@ void MAX6675_setup()
 
 void MAX6675_loop()
 {
-    Serial.print("MAX6675 C = ");
-    Serial.println(thermocouple.readCelsius());
-
+    float tmepC = thermocouple.readCelsius();
+    pfData.MAX6675Temp = tmepC;
     //     // go to line #1
     //     lcd.setCursor(0, 1);
     //     lcd.print(thermocouple.readCelsius());
@@ -54,6 +56,4 @@ void MAX6675_loop()
     //     lcd.print(0, BYTE);
     // #endif
     //     lcd.print('F');
-
-    delay(1000);
 }
