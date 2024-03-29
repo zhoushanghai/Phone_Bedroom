@@ -5,17 +5,25 @@
 #include "global.h"
 
 #include "PWM.h"
-#include "SHT40.h"
-#include "MAX6675_my.h"
 #include "OLED.h"
 #include "UART.h"
+#include "KEY.h"
+#include "phoneBedroom.h"
+
+// ButtonState keySta = IDLE;
+
+int keySta = N_key;
+int timeCnt = 0;
+// int
+
 // put function declarations here:
 void set_flag(int *flag);
 int detFlag(int *flag);
+void countTime();
 // software timer
-Ticker oledTimer, sht40Timer, max6675Timer, uartTimer;
+Ticker oledTimer, uartTimer, keyTimer, countTimer, chargerTimer;
 
-int flagOLED = 0, flagSHT40 = 0, flagMAX6675 = 0, flagUART = 0;
+int flagOLED = 0, flagUART = 0, flagKey = 0;
 
 THDate pfData;
 
@@ -25,14 +33,18 @@ void setup()
   Serial.begin(115200);
   OLED096_setup();
   PWM_setup();
-  SHT40_setup();
-  MAX6675_setup();
+  key_setup();
 
   // software timer
   oledTimer.attach_ms(100, set_flag, &flagOLED);
-  sht40Timer.attach_ms(50, set_flag, &flagSHT40);
-  max6675Timer.attach_ms(200, set_flag, &flagMAX6675);
+
   uartTimer.attach_ms(1000, set_flag, &flagUART);
+
+  keyTimer.attach_ms(10, set_flag, &flagKey);
+
+  countTimer.attach(1, countTime);
+
+  // chargerTimer.attach_ms(10, charger_run_loop);
 }
 
 void loop()
@@ -43,21 +55,30 @@ void loop()
     // OLED096_loop();
     OLED_showData();
   }
-  if (detFlag(&flagSHT40))
-  {
-    SHT40_loop();
-  }
-  if (detFlag(&flagMAX6675))
-  {
-    MAX6675_loop();
-  }
   if (detFlag(&flagUART))
   {
-    Serial.println("running");
-    pfData_UART();
+    // Serial.println("running");
+    // pfData_UART();
   }
-
-  // PWM_loop();
+  if (detFlag(&flagKey))
+  {
+    keySta = key_read();
+    charger_run_loop();
+    switch (keySta)
+    {
+    case S_key:
+      Serial.println("Pressed");
+      break;
+    case L_key:
+      Serial.println("Long Press");
+      break;
+    case D_key:
+      Serial.println("Double Click");
+      break;
+    default:
+      break;
+    }
+  }
 }
 
 // put function definitions here:
@@ -77,4 +98,9 @@ int detFlag(int *flag)
   {
     return 0;
   }
+}
+
+void countTime()
+{
+  timeCnt++;
 }

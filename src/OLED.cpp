@@ -26,7 +26,6 @@ void OLED_showData()
     u8g2.firstPage();
     do
     {
-        // 绘制页面内容
         u8g2.drawStr(2, 12, "DATA");
         u8g2.drawHLine(0, 14, 128);
         for (int i = 0; i < MENU_SIZE; i++)
