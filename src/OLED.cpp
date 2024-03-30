@@ -18,6 +18,8 @@ void OLED096_setup()
     // u8g2 initialization
     u8g2.begin();
     u8g2.enableUTF8Print();
+    u8g2.setFont(u8g2_font_unifont_t_chinese3);
+    u8g2.setFontDirection(0);
 }
 
 void OLED_showData()
@@ -26,7 +28,8 @@ void OLED_showData()
     u8g2.firstPage();
     do
     {
-        u8g2.drawStr(2, 12, "DATA");
+        u8g2.drawStr(2, 12, "DAT");
+        u8g2.drawUTF8(2, 12, "准备 等待 充电 结束");
         u8g2.drawHLine(0, 14, 128);
         for (int i = 0; i < MENU_SIZE; i++)
         {
@@ -45,21 +48,18 @@ void OLED_showData()
 
 void OLED096_loop()
 {
-    // put your main code here, to run repeatedly:
-    u8g2.setFont(u8g2_font_unifont_t_chinese3);
-    u8g2.setFontDirection(0);
 
     u8g2.clearBuffer();
+    u8g2.setCursor(2, 60);
+    u8g2.print("准备()");
+    u8g2.setDrawColor(0);
+    u8g2.setCursor(30, 60);
+    u8g2.print("准备()");
+    u8g2.setDrawColor(1);
+    u8g2.drawFrame(0, 10, 128, 20);
 
-    u8g2.firstPage();
-    do
-    {
-        u8g2.drawFrame(0, 10, 128, 20);
-        u8g2.drawUTF8(2, 60, "hi 王海舟");
-        u8g2.drawBox(0, 10, progess, 20);
-
-    } while (u8g2.nextPage());
-
+    u8g2.drawBox(0, 10, progess, 20);
+    u8g2.sendBuffer();
     if (progess < 128)
     {
         progess += 2;
@@ -68,9 +68,31 @@ void OLED096_loop()
     {
         progess = 0;
     }
+
+    // // put your main code here, to run repeatedly:
+
+    // u8g2.clearBuffer();
+
+    // u8g2.firstPage();
+    // do
+    // {
+    //     u8g2.drawFrame(0, 10, 128, 20);
+    //     u8g2.drawUTF8(30, 60, "充电 完成");
+    //     u8g2.drawUTF8(2, 60, "准备");
+    //     u8g2.drawBox(0, 10, progess, 20);
+
+    // } while (u8g2.nextPage());
+
+    // if (progess < 128)
+    // {
+    //     progess += 2;
+    // }
+    // else
+    // {
+    //     progess = 0;
+    // }
 }
 
 void OLED_PhoneBedroom()
 {
-    
 }

@@ -54,7 +54,7 @@ void loop()
   if (detFlag(&flagOLED))
   {
     // OLED096_loop();
-    OLED_showData();
+    // OLED_showData();
   }
   if (detFlag(&flagUART))
   {

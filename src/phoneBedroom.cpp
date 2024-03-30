@@ -3,6 +3,7 @@
 
 extern int keySta;
 extern int timeCnt;
+extern U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2;
 
 #define ENUM_ITEM(ITEM) ITEM,
 #define ENUM_STRING(ITEM) #ITEM,
@@ -44,6 +45,10 @@ CHARGER_STATUS charger_do_idle()
     {
         nextStatus = CS_PREPRE_START;
     }
+    if (keySta == D_key)
+    {
+        nextStatus = CS_PAUSE;
+    }
 
     return nextStatus;
 }
@@ -58,6 +63,10 @@ CHARGER_STATUS charger_do_prepare_start()
     if (keySta == L_key)
     {
         nextStatus = CS_IDLE;
+    }
+    if (keySta == D_key)
+    {
+        nextStatus = CS_PAUSE;
     }
     return nextStatus;
 }
@@ -74,10 +83,14 @@ CHARGER_STATUS charger_do_prepare_end()
     {
         nextStatus = CS_IDLE;
     }
+    if (keySta == D_key)
+    {
+        nextStatus = CS_PAUSE;
+    }
 
     return nextStatus;
 }
-////////////////this is also will change/////////////////////////////////////////////////////////
+
 CHARGER_STATUS charger_do_wait_phone()
 {
     CHARGER_STATUS nextStatus = CS_WAIT_PHONE;
@@ -88,6 +101,10 @@ CHARGER_STATUS charger_do_wait_phone()
     if (keySta == L_key)
     {
         nextStatus = CS_IDLE;
+    }
+    if (keySta == D_key)
+    {
+        nextStatus = CS_PAUSE;
     }
     return nextStatus;
 }
@@ -103,13 +120,16 @@ CHARGER_STATUS charger_do_charging()
     {
         nextStatus = CS_PAUSE;
     }
-
+    if (keySta == L_key)
+    {
+        nextStatus = CS_IDLE;
+    }
     // if (nextStatus != nowchargerStatus)
     // {
     //     timeCnt = 0;
     // }
 
-    if (timeCnt >= 1000)
+    if (timeCnt >= 10)
     {
         nextStatus = CS_CHARGED;
     }
@@ -122,12 +142,20 @@ CHARGER_STATUS charger_do_charged()
     CHARGER_STATUS nextStatus = CS_CHARGED;
     if (keySta == S_key)
     {
-        nextStatus = CS_CHARGING;
+        nextStatus = CS_IDLE;
+    }
+    if (keySta == L_key)
+    {
+        nextStatus = CS_IDLE;
     }
 
-    if (timeCnt >= 1000)
+    if (timeCnt >= 10)
     {
-        nextStatus = CS_PREPRE_START;
+        nextStatus = CS_IDLE;
+    }
+    if (keySta == D_key)
+    {
+        nextStatus = CS_PAUSE;
     }
 
     return nextStatus;
@@ -138,7 +166,7 @@ CHARGER_STATUS charger_do_pause()
     CHARGER_STATUS nextStatus = CS_PAUSE;
     if (keySta == D_key)
     {
-        nextStatus = CS_CHARGING;
+        nextStatus = lastChargerStatus;
     }
     if (keySta == L_key)
     {
@@ -149,6 +177,7 @@ CHARGER_STATUS charger_do_pause()
 
 void charger_run_loop()
 {
+    static int timeCntShow = 0;
     switch (chargerStatus)
     {
     case CS_INIT:
@@ -179,6 +208,151 @@ void charger_run_loop()
         break;
     }
 
+    if (timeCntShow++ % 10 == 0)
+    {
+        switch (chargerStatus)
+        {
+        case CS_INIT:
+
+            break;
+        case CS_IDLE:
+
+            if (nowChargerStatus != lastChargerStatus)
+            {
+                u8g2.clearBuffer();
+                ////////////菜单////////////////
+                u8g2.setCursor(0, 14);
+                u8g2.print("开始 准备 等待 充电 完成");
+                u8g2.setDrawColor(0);
+                u8g2.setCursor(0, 14);
+                u8g2.print("开始");
+                u8g2.setDrawColor(1);
+                u8g2.drawHLine(0, 16, 128);
+                ///////////显示内容/////////////////
+
+                u8g2.setCursor(30, 45);
+                u8g2.print("开始充电");
+                u8g2.sendBuffer();
+            }
+
+            break;
+        case CS_PREPRE_START:
+            if (nowChargerStatus != lastChargerStatus)
+            {
+                u8g2.clearBuffer();
+                ////////////菜单////////////////
+                u8g2.setCursor(0, 14);
+                u8g2.print("开始 准备 等待 充电 完成");
+                u8g2.setDrawColor(0);
+                u8g2.setCursor(40, 14);
+                u8g2.print("准备");
+                u8g2.setDrawColor(1);
+                u8g2.drawHLine(0, 18, 128);
+                ///////////显示内容/////////////////
+                u8g2.setCursor(14, 40);
+                u8g2.print("做好事前准备");
+
+                u8g2.sendBuffer();
+            }
+            break;
+        case CS_PREPRE_END:
+
+            break;
+        case CS_WAIT_PHONE:
+            if (nowChargerStatus != lastChargerStatus)
+            {
+                u8g2.clearBuffer();
+                ////////////菜单////////////////
+                u8g2.setCursor(0, 14);
+                u8g2.print("开始 准备 等待 充电 完成");
+                u8g2.setDrawColor(0);
+                u8g2.setCursor(80, 14);
+                u8g2.print("等待");
+                u8g2.setDrawColor(1);
+                u8g2.drawHLine(0, 18, 128);
+                ///////////显示内容/////////////////
+                u8g2.setCursor(14, 40);
+                u8g2.print("等待放入手机");
+
+                u8g2.sendBuffer();
+            }
+            break;
+        case CS_CHARGING:
+
+            u8g2.clearBuffer();
+            ////////////菜单////////////////
+            u8g2.setCursor(0, 14);
+            u8g2.print("准备 等待 充电 完成");
+            u8g2.setDrawColor(0);
+            u8g2.setCursor(80, 14);
+            u8g2.print("充电");
+            u8g2.setDrawColor(1);
+            u8g2.drawHLine(0, 18, 128);
+            ///////////显示内容/////////////////
+            u8g2.setCursor(30, 48);
+            u8g2.print("充电ing");
+            static int boxlong = 0;
+            u8g2.drawFrame(22 + 3, 30, 70, 26);
+            u8g2.drawBox(92 + 3, 39, 6, 8);
+
+            u8g2.drawBox(22 + 3, 30, boxlong, 26);
+
+            u8g2.sendBuffer();
+
+            if (boxlong < 70)
+            {
+                boxlong += 2;
+            }
+            else
+            {
+                boxlong = 0;
+            }
+
+            break;
+        case CS_CHARGED:
+            if (nowChargerStatus != lastChargerStatus)
+            {
+                u8g2.clearBuffer();
+                ////////////菜单////////////////
+                u8g2.setCursor(0, 14);
+                u8g2.print("等待 充电 完成");
+                u8g2.setDrawColor(0);
+                u8g2.setCursor(80, 14);
+                u8g2.print("完成");
+                u8g2.setDrawColor(1);
+                u8g2.drawHLine(0, 18, 128);
+                ///////////显示内容/////////////////
+                u8g2.setCursor(30, 40);
+                u8g2.print("充电完成");
+
+                u8g2.sendBuffer();
+            }
+            break;
+        case CS_PAUSE:
+            if (nowChargerStatus != lastChargerStatus)
+            {
+                u8g2.clearBuffer();
+                ////////////菜单////////////////
+                u8g2.setCursor(0, 14);
+                u8g2.print("开始 准备 等待 充电 完成");
+                u8g2.setDrawColor(0);
+                u8g2.setCursor(80, 14);
+                u8g2.print("等待");
+                u8g2.setDrawColor(1);
+                u8g2.drawHLine(0, 18, 128);
+                ///////////显示内容/////////////////
+                u8g2.clearBuffer();
+                u8g2.drawRFrame(15, 5, 98, 54, 5);
+                u8g2.drawBox(10 + 40, 10 + 4, 9, 36);
+                u8g2.drawBox(10 + 40 + 6 + 16, 10 + 4, 9, 36);
+                u8g2.sendBuffer();
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
     if (nowChargerStatus != chargerStatus)
     {
         Serial.print("Charger Status: ");
@@ -187,5 +361,7 @@ void charger_run_loop()
         nowChargerStatus = chargerStatus;
 
         timeCnt = 0;
+
+        u8g2.clearDisplay();
     }
 }
