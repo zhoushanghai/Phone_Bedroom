@@ -23,7 +23,7 @@ void countTime();
 // software timer
 Ticker oledTimer, uartTimer, keyTimer, countTimer, chargerTimer;
 
-int flagOLED = 0, flagUART = 0, flagKey = 0;
+int flagOLED = 0, flagUART = 0, flagKey = 0, flagBuzzer = 0, flagUnBuzzer = 0;
 
 THDate pfData;
 
@@ -50,6 +50,7 @@ void setup()
 void loop()
 {
   // put your main code here, to run repeatedly:
+
   if (detFlag(&flagOLED))
   {
     // OLED096_loop();
@@ -68,15 +69,38 @@ void loop()
     {
     case S_key:
       Serial.println("Pressed");
+      flagBuzzer = 1;
       break;
     case L_key:
       Serial.println("Long Press");
+      flagBuzzer = 1;
       break;
     case D_key:
       Serial.println("Double Click");
+      flagBuzzer = 1;
       break;
     default:
       break;
+    }
+
+    // buzeer
+    if (flagBuzzer)
+    {
+      static int i = 0;
+      if (i == 0)
+      {
+        ledcWrite(CHANNEL, 1500); // 打开蜂鸣器
+      }
+      if (i++ > 5)
+      {
+        i = 0;
+        flagBuzzer = 0;
+        flagUnBuzzer = 1;
+      }
+    }
+    if (detFlag(&flagUnBuzzer))
+    {
+      ledcWrite(CHANNEL, 0); // 关闭蜂鸣器
     }
   }
 }

@@ -6,6 +6,12 @@
 #include "global.h"
 
 #define BUTTON_PIN 4
+#define DETECT_PIN 7
+/*
+灰度传感器
+1 没有遮挡
+0 有遮挡
+*/
 
 #define N_key 0 // 无键
 #define S_key 1 // 单键

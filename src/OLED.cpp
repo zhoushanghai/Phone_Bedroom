@@ -69,3 +69,8 @@ void OLED096_loop()
         progess = 0;
     }
 }
+
+void OLED_PhoneBedroom()
+{
+    
+}

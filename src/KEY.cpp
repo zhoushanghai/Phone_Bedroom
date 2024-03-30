@@ -14,6 +14,7 @@
 void key_setup()
 {
     pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(DETECT_PIN, INPUT_PULLUP);
 }
 
 unsigned char key_driver(void)

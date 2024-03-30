@@ -65,8 +65,8 @@ CHARGER_STATUS charger_do_prepare_start()
 CHARGER_STATUS charger_do_prepare_end()
 {
     CHARGER_STATUS nextStatus = CS_WAIT_PHONE;
-    /// 这里只是一个测试，因为还没有灰度传感器
-    if (keySta == S_key)
+
+    if (!digitalRead(DETECT_PIN))
     {
         nextStatus = CS_CHARGING;
     }
@@ -74,13 +74,14 @@ CHARGER_STATUS charger_do_prepare_end()
     {
         nextStatus = CS_IDLE;
     }
+
     return nextStatus;
 }
 ////////////////this is also will change/////////////////////////////////////////////////////////
 CHARGER_STATUS charger_do_wait_phone()
 {
     CHARGER_STATUS nextStatus = CS_WAIT_PHONE;
-    if (keySta == S_key)
+    if (!digitalRead(DETECT_PIN))
     {
         nextStatus = CS_CHARGING;
     }
