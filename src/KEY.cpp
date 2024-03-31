@@ -4,7 +4,7 @@
 低层按键（I/0）扫描函数，即低层按键设备驱动，
 只返回无键、短按和长按。具体双击不在此处判断。
 ===============*/
-#define key_input digitalRead(BUTTON_PIN) // 按键输入口
+#define key_input !digitalRead(BUTTON_PIN) // 按键输入口
 
 #define key_state_0 0
 #define key_state_1 1

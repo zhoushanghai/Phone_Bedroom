@@ -362,6 +362,6 @@ void charger_run_loop()
 
         timeCnt = 0;
 
-        u8g2.clearDisplay();
+        // u8g2.clearDisplay();
     }
 }
